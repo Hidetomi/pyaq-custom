@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import glob
-from sys import stderr
-from board import *
+from board import BSIZE, KOMI, BVCNT, Board, ev2rv
 import numpy as np
 
 

@@ -3,7 +3,7 @@
 from math import sqrt
 from sys import stderr
 import time
-from board import *
+from board import BVCNT, VNULL, FEATURE_CNT, PASS, Board, rv2ev, ev2str
 import model
 import numpy as np
 import tensorflow as tf

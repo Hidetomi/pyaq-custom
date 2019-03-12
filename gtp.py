@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sys import stderr, stdout, stdin
-from board import *
+from sys import stdout, stdin
+from board import BSIZE, Board, rv2ev, str2ev, ev2str
 import numpy as np
 from search import Tree
 

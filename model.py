@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from board import *
+from board import BSIZE, FEATURE_CNT, BVCNT
 import tensorflow as tf
 
 FILTER_CNT = 96

@@ -3,11 +3,11 @@
 
 from collections import Counter
 import sys
-from board import *
+from board import BVCNT, PASS, Board, rv2ev
 import gtp
 import learn
 import search
-
+import numpy as np
 
 if __name__ == "__main__":
     args = sys.argv

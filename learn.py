@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sys import stderr, stdout
+from sys import stdout
 import time
-from board import *
+from board import BVCNT, BSIZE, FEATURE_CNT
 import model
 import numpy as np
 from sgf import sgf2feed, import_sgf
