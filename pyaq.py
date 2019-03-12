@@ -8,35 +8,21 @@ import gtp
 import learn
 import search
 import numpy as np
+from parameter_loader import ParameterLoader
+from parameters import PARAMS
 
 if __name__ == "__main__":
-    args = sys.argv
 
-    launch_mode = 0  # 0: gtp, 1: self, 2: learn
-    byoyomi = 3.0
-    main_time = 0.0
-    quick = False
-    random = False
-    clean = False
-    use_gpu = True
-
-    for arg in args:
-        if arg.find("self") >= 0:
-            launch_mode = 1
-        elif arg.find("learn") >= 0:
-            launch_mode = 2
-        elif arg.find("quick") >= 0:
-            quick = True
-        elif arg.find("random") >= 0:
-            random = True
-        elif arg.find("clean") >= 0:
-            clean = True
-        elif arg.find("main_time") >= 0:
-            main_time = float(arg[arg.find("=") + 1:])
-        elif arg.find("byoyomi") >= 0:
-            byoyomi = float(arg[arg.find("=") + 1:])
-        elif arg.find("cpu") >= 0:
-            use_gpu = False
+    ParameterLoader()
+    launch_mode = PARAMS.get("launch_mode")
+    model = PARAMS.get("model")
+    sgf_dir = PARAMS.get("sgf_dir")
+    use_gpu = PARAMS.get("use_gpu")
+    main_time = PARAMS.get("main_time")
+    byoyomi = PARAMS.get("byoyomi")
+    quick = PARAMS.get("quick")
+    random = PARAMS.get("random")
+    clean = PARAMS.get("clean")
 
     if launch_mode == 0:
         gtp.call_gtp(main_time, byoyomi, quick, clean, use_gpu)
@@ -44,7 +30,7 @@ if __name__ == "__main__":
     elif launch_mode == 1:
         b = Board()
         if not random:
-            tree = search.Tree("model.ckpt", use_gpu)
+            tree = search.Tree(model, use_gpu)
 
         while b.move_cnt < BVCNT * 2:
             prev_move = b.prev_move
@@ -78,4 +64,4 @@ if __name__ == "__main__":
         sys.stderr.write("result: %s\n" % result_str)
 
     else:
-        learn.learn(3e-4, 0.5, sgf_dir="sgf/", use_gpu=use_gpu, gpu_cnt=1)
+        learn.learn(3e-4, 0.5, sgf_dir=sgf_dir, use_gpu=use_gpu, gpu_cnt=1)
