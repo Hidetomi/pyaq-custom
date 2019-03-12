@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+env/
 build/
 develop-eggs/
 dist/
@@ -43,6 +44,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+cover/
 *.cover
 .hypothesis/
 .pytest_cache/
@@ -102,3 +104,10 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# vscode
+.vscode/
+
+# main
+sgf/
+*.sgf
