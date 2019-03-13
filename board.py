@@ -55,7 +55,7 @@ def ev2str(ev):
     if ev >= PASS:
         return "pass"
     x, y = ev2xy(ev)
-    return x_labels[x - 1] + str(y)
+    return LABELS[x - 1] + str(y)
 
 
 def str2ev(v_str):
@@ -63,7 +63,7 @@ def str2ev(v_str):
     if v_str == "PASS" or v_str == "RESIGN":
         return PASS
     else:
-        x = x_labels.find(v_str[0]) + 1
+        x = LABELS.find(v_str[0]) + 1
         y = int(v_str[1:])
         return xy2ev(x, y)
 
@@ -329,7 +329,7 @@ class Board(object):
         def pirnt_xlabel():
             line_str = "  "
             for x in range(BSIZE):
-                line_str += " " + x_labels[x] + " "
+                line_str += " " + LABELS[x] + " "
             stderr.write(line_str + "\n")
 
         pirnt_xlabel()
