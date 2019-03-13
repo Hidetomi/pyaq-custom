@@ -167,7 +167,7 @@ def learn(lr_=1e-4, dr_=0.7, sgf_dir="sgf/", use_gpu=True, gpu_cnt=1):
     # start_time = time.time()
 
     # training
-    for epoch_idx in range(total_epochs):
+    for epoch_idx in trange(total_epochs, desc="epocs"):
         if epoch_idx > 0 and (epoch_idx - 8) % 8 == 0:
             learning_rate *= 0.5
             stdout_log("learning rate=%.1g\n" % (learning_rate))
@@ -187,10 +187,11 @@ def learn(lr_=1e-4, dr_=0.7, sgf_dir="sgf/", use_gpu=True, gpu_cnt=1):
         acc_steps = feed[1].size // batch_cnt
         np.random.shuffle(feed[0]._perm)
 
-        for _ in range(acc_steps):
-            acc_batch = feed[i].next_batch(batch_cnt)
-            sess.run(accuracy, feed_dict={f_acc: acc_batch[0],
-                                          m_acc: acc_batch[1],
-                                          r_acc: acc_batch[2]})
+        for i in range(2):
+            for _ in trange(acc_steps, desc="acc"):
+                acc_batch = feed[i].next_batch(batch_cnt)
+                sess.run(accuracy, feed_dict={f_acc: acc_batch[0],
+                                              m_acc: acc_batch[1],
+                                              r_acc: acc_batch[2]})
 
     dn.save_vars(sess, "model.ckpt")
