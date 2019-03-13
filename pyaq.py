@@ -8,12 +8,10 @@ import gtp
 import learn
 import search
 import numpy as np
-from parameter_loader import ParameterLoader
 from parameters import PARAMS
 
 if __name__ == "__main__":
 
-    ParameterLoader()
     launch_mode = PARAMS.get("launch_mode")
     model = PARAMS.get("model")
     sgf_dir = PARAMS.get("sgf_dir")
