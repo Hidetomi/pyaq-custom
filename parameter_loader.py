@@ -59,6 +59,8 @@ class ParameterLoader(object):
         self.__params['batch_cnt'] = config['LEARNING'].getint('batch_cnt')
         self.__params['total_epochs'] = config['LEARNING'].getint(
             'total_epochs')
+        self.__params['keep_previous_count'] = config['LEARNING'].getint(
+            'keep_previous_count')
 
         # GO
         self.__params['board_size'] = config['GO'].getint('board_size')

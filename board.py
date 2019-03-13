@@ -1,22 +1,34 @@
 # -*- coding: utf-8 -*-
-
-
 from sys import stderr
 import numpy as np
+from parameters import PARAMS as param
 
+# x路盤
+BSIZE: int = param.get("board_size")
+# x路盤交点数
+BVCNT: int = BSIZE ** 2  # vertex count
 
-BSIZE = 9  # board size
-EBSIZE = BSIZE + 2  # extended board size
-BVCNT = BSIZE ** 2  # vertex count
-EBVCNT = EBSIZE ** 2  # extended vertex count
-PASS = EBVCNT  # pass
-VNULL = EBVCNT + 1  # invalid position
-KOMI = 7.0
+# 拡張x路盤
+EBSIZE: int = BSIZE + 2
+# 拡張x路盤交点数
+EBVCNT: int = EBSIZE ** 2
+
+# コミ
+KOMI: float = param.get("komi")
+# パス
+PASS = EBVCNT
+# 着手不可
+VNULL = EBVCNT + 1
+# 盤面
+LABELS = "ABCDEFGHJKLMNOPQRST"
+
 dir4 = [1, EBSIZE, -1, -EBSIZE]
 diag4 = [1 + EBSIZE, EBSIZE - 1, -EBSIZE - 1, 1 - EBSIZE]
-KEEP_PREV_CNT = 2
-FEATURE_CNT = KEEP_PREV_CNT * 2 + 3  # 7
-x_labels = "ABCDEFGHJKLMNOPQRST"
+
+# 直前手数
+KEEP_PREV_CNT: int = param.get("keep_previous_count")
+# 着手候補
+FEATURE_CNT: int = KEEP_PREV_CNT * 2 + 3  # 7
 
 
 def ev2xy(ev):
