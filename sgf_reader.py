@@ -60,6 +60,7 @@ def sgf2feed(games, all_games_total_tempo):
         # 対局結果取得
         re = re2dec(game_information.get('RE')[0])
         if re == 0:
+            # これは暫定
             continue
 
         # 一手目から開始
@@ -69,10 +70,16 @@ def sgf2feed(games, all_games_total_tempo):
 
             train_idx = j - 1
             b.clear()
-            feature[train_idx] = b.feature()
-            move[train_idx, ev2rv(sgf2ev(node.current_prop_value[0]))] = 1
-            result[train_idx] = re * (2 * b.turn - 1)
+            # 盤面作成
             b.play(sgf2ev(node.current_prop_value[0]), False)
+            # 今の盤面
+            feature[train_idx] = b.feature()
+            # 次の一手
+            # Sgf形式の座標→拡張碁盤の座標→座標
+            move[train_idx, ev2rv(sgf2ev(node.current_prop_value[0]))] = 1
+            # 勝敗
+            # 対局中か否か
+            result[train_idx] = re * (2 * b.turn - 1)
 
     return feature, move, result
 

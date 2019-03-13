@@ -172,7 +172,7 @@ def learn(lr_=1e-4, dr_=0.7, sgf_dir="sgf/", use_gpu=True, gpu_cnt=1):
             learning_rate *= 0.5
             stdout_log("learning rate=%.1g\n" % (learning_rate))
 
-        for step_idx in trange(epoch_steps, desc="Training....."):
+        for _unuse in trange(epoch_steps, desc="Training....."):
             feed_dict_ = {}
             feed_dict_[lr] = learning_rate
             for gpu_idx in range(gpu_cnt):

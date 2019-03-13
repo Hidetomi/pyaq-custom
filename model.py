@@ -13,9 +13,8 @@ b_wdt = 0.015
 class DualNetwork(object):
 
     def get_variable(self, shape_, width_=0.007, name_="weight"):
-        var = tf.get_variable(name_, shape=shape_,
-                              initializer=tf.random_normal_initializer(
-                                  mean=0, stddev=width_))
+        initializer = tf.random_normal_initializer(mean=0, stddev=width_)
+        var = tf.get_variable(name_, shape=shape_, initializer=initializer)
 
         if not tf.get_variable_scope()._reuse:
             tf.add_to_collection("vars_train", var)
@@ -60,8 +59,10 @@ class DualNetwork(object):
             input_size = FEATURE_CNT if i == 0 else FILTER_CNT
             dr_block = 1 - (1 - dr) / BLOCK_CNT * i
 
-            hi.append(self.res_block(prev_h, input_size, FILTER_CNT, FILTER_CNT,
-                                     dr_block=dr_block, scope_name="res%d" % i))
+            hi.append(self.res_block(prev_h, input_size,
+                                     FILTER_CNT, FILTER_CNT,
+                                     dr_block=dr_block,
+                                     scope_name="res%d" % i))
             prev_h = hi[i]
 
         # policy connection
@@ -116,7 +117,8 @@ class DualNetwork(object):
         with tf.get_default_graph().as_default():
 
             sess_ = tf.Session(config=tf.ConfigProto(
-                allow_soft_placement=True, log_device_placement=False))
+                allow_soft_placement=True, log_device_placement=False)
+                )
             vars_train = tf.get_collection("vars_train")
             v_to_init = list(set(tf.global_variables()) - set(vars_train))
 
