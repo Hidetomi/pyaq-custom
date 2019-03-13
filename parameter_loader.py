@@ -61,6 +61,11 @@ class ParameterLoader(object):
             'total_epochs')
         self.__params['keep_previous_count'] = config['LEARNING'].getint(
             'keep_previous_count')
+        self.__params['filter_count'] = config['LEARNING'].getint(
+            'filter_count')
+        self.__params['block_count'] = config['LEARNING'].getint('block_count')
+        self.__params['w_wdt'] = config['LEARNING'].getint('w_wdt')
+        self.__params['b_wdt'] = config['LEARNING'].getint('b_wdt')
 
         # GO
         self.__params['board_size'] = config['GO'].getint('board_size')

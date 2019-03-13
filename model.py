@@ -3,11 +3,13 @@
 from board import BSIZE, FEATURE_CNT, BVCNT
 import tensorflow as tf
 
-FILTER_CNT = 96
-BLOCK_CNT = 6
+from parameters import PARAMS as param
 
-w_wdt = 0.007
-b_wdt = 0.015
+FILTER_CNT = param.get("filter_count")
+BLOCK_CNT = param.get("block_count")
+
+w_wdt = param.get("w_wdt")
+b_wdt = param.get("b_wdt")
 
 
 class DualNetwork(object):
@@ -118,7 +120,7 @@ class DualNetwork(object):
 
             sess_ = tf.Session(config=tf.ConfigProto(
                 allow_soft_placement=True, log_device_placement=False)
-                )
+            )
             vars_train = tf.get_collection("vars_train")
             v_to_init = list(set(tf.global_variables()) - set(vars_train))
 
