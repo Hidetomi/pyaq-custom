@@ -1,9 +1,9 @@
 # pyaq-custom
 
-pyaq-customは、[Pyaq](https://github.com/otetsudaisan1/Pyaq)を改造した囲碁プログラムです。  
+pyaq-customは、[Pyaq](https://github.com/ymgaq/Pyaq)を改造した囲碁プログラムです。  
 このプログラムは深層学習の自己学習を目的としています。
 
-### v1.0.1
+### v1.1
 
 #### feature
 
@@ -20,5 +20,5 @@ pyaq-customは、[Pyaq](https://github.com/otetsudaisan1/Pyaq)を改造した囲
 - 一部エラーハンドリング処理
 
 ## ライセンス
-[MITライセンス](https://github.com/otetsudaisan1/pyaq-custom/blob/master/LICENSE)  
+[MITライセンス](https://github.com/Hidetomi/pyaq-custom/blob/master/LICENSE)  
 Author: [otetsudaisan1](https://twitter.com/otetsudaisan1)  
