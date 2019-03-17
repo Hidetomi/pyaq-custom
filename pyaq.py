@@ -14,8 +14,6 @@ if __name__ == "__main__":
 
     launch_mode = PARAMS.get("launch_mode")
     model = PARAMS.get("model")
-    sgf_dir = PARAMS.get("sgf_dir")
-    use_gpu = PARAMS.get("use_gpu")
     main_time = PARAMS.get("main_time")
     byoyomi = PARAMS.get("byoyomi")
     quick = PARAMS.get("quick")
@@ -23,12 +21,12 @@ if __name__ == "__main__":
     clean = PARAMS.get("clean")
 
     if launch_mode == 0:
-        gtp.call_gtp(main_time, byoyomi, quick, clean, use_gpu)
+        gtp.call_gtp(main_time, byoyomi, quick, clean, PARAMS.get("use_gpu"))
 
     elif launch_mode == 1:
         b = Board()
         if not random:
-            tree = search.Tree(model, use_gpu)
+            tree = search.Tree(model, PARAMS.get("use_gpu"))
 
         while b.move_cnt < BVCNT * 2:
             prev_move = b.prev_move
@@ -62,4 +60,4 @@ if __name__ == "__main__":
         sys.stderr.write("result: %s\n" % result_str)
 
     else:
-        learn.learn(3e-4, 0.5, sgf_dir=sgf_dir, use_gpu=use_gpu, gpu_cnt=1)
+        learn.learn(3e-4, 0.5, gpu_cnt=1)
