@@ -15,6 +15,13 @@ from parameters import PARAMS
 rnd_array = [np.arange(BVCNT + 1)]
 device_name = "gpu" if PARAMS.get("use_gpu") else "cpu"
 
+gpu_cnt = 1
+
+tower_grads = []
+features = []
+movies = []
+results = []
+
 for i in range(1, 8):
     rnd_array.append(rnd_array[i - 1])
     rot_array = rnd_array[i][:BVCNT].reshape(BSIZE, BSIZE)
@@ -76,18 +83,16 @@ def stdout_log(str):
     log_file.close()
 
 
-def create_loss_model(gpu_idx, dn, dr_, opt, f_list, m_list, r_list):
+def create_loss_model(gpuid, dn, dr_, opt):
     # compute and apply gradients
-    tower_grads = []
-
-    policy_, value_ = dn.model(f_list[gpu_idx], temp=1.0, dr=dr_)
+    policy_, value_ = dn.model(features[gpuid], temp=1.0, dr=dr_)
     policy_ = tf.clip_by_value(policy_, 1e-6, 1)
 
     loss_p = - tf.reduce_mean(tf.log(tf.reduce_sum(
-        tf.multiply(m_list[gpu_idx], policy_), 1)))
-    loss_v = tf.reduce_mean(tf.square(tf.subtract(value_, r_list[gpu_idx])))
+        tf.multiply(movies[gpuid], policy_), 1)))
+    loss_v = tf.reduce_mean(tf.square(tf.subtract(value_, results[gpuid])))
 
-    if gpu_idx == 0:
+    if gpuid == 0:
         vars_train = tf.get_collection("vars_train")
 
     loss_l2 = tf.add_n([tf.nn.l2_loss(v) for v in vars_train])
@@ -98,7 +103,15 @@ def create_loss_model(gpu_idx, dn, dr_, opt, f_list, m_list, r_list):
 
     tf.summary.scalar('loss', loss)
 
-    return tower_grads
+
+def apply_gradients(opt, dn, dr_):
+    # compute and apply gradients
+    with tf.variable_scope(tf.get_variable_scope()):
+        for i in range(gpu_cnt):
+            with tf.device("/%s:%d" % (device_name, i)):
+                create_loss_model(i, dn, dr_, opt)
+
+    return opt.apply_gradients(average_gradients(tower_grads))
 
 
 def create_accuracy_model(dn):
@@ -116,50 +129,46 @@ def create_accuracy_model(dn):
         p_, v_ = dn.model(acc["feature"], temp=1.0, dr=1.0)
         prediction = tf.equal(tf.reduce_max(p_, 1),
                               tf.reduce_max(tf.multiply(p_, acc["move"]), 1))
-        accuracy_p = tf.reduce_mean(tf.cast(prediction, "float"))
+        accuracy_p = tf.reduce_mean(tf.cast(prediction, tf.float32))
         accuracy_v = tf.reduce_mean(tf.square(tf.subtract(v_, acc["result"])))
         accuracy = (accuracy_p, accuracy_v)
 
-        return acc, accuracy
+    return acc, accuracy
 
 
-def placeholders(gpu_cnt):
-    f_list = []
-    r_list = []
-    m_list = []
+def placeholders():
     for gpu_idx in range(gpu_cnt):
-        f_list.append(tf.placeholder(
-            "float", shape=[None, BVCNT, FEATURE_CNT],
+        features.append(tf.placeholder(
+            tf.float32, shape=[None, BVCNT, FEATURE_CNT],
             name="feature_%d" % gpu_idx))
-        r_list.append(tf.placeholder(
-            "float", shape=[None], name="result_%d" % gpu_idx))
-        m_list.append(tf.placeholder(
-            "float", shape=[None, BVCNT + 1], name="move_%d" % gpu_idx))
-
-    return f_list, m_list, r_list
+        results.append(tf.placeholder(
+            tf.float32, shape=[None], name="result_%d" % gpu_idx))
+        movies.append(tf.placeholder(
+            tf.float32, shape=[None, BVCNT + 1], name="move_%d" % gpu_idx))
 
 
-def learn(lr_=1e-4, dr_=0.7, gpu_cnt=1):
+def learn(lr_=1e-4, dr_=0.7):
 
     with tf.get_default_graph().as_default(), tf.device("/cpu:0"):
 
         # placeholders
-        f_list, m_list, r_list = placeholders(gpu_cnt)
+        placeholders()
 
         lr = tf.placeholder(tf.float32, shape=[], name="learning_rate")
 
         # Adamアルゴリズム,lr=学習率
-        opt = tf.train.AdamOptimizer(lr)
+        optimizer = tf.train.AdamOptimizer(lr)
         dn = model.DualNetwork()
 
-        # compute and apply gradients
-        with tf.variable_scope(tf.get_variable_scope()):
-            for gpu_idx in range(gpu_cnt):
-                with tf.device("/%s:%d" % (device_name, gpu_idx)):
-                    tower_grads = create_loss_model(
-                        gpu_idx, dn, dr_, opt, f_list, m_list, r_list)
+        # 勾配計算
+        train_optimizer = apply_gradients(optimizer, dn, dr_)
 
-        train_op = opt.apply_gradients(average_gradients(tower_grads))
+        for i, grads in enumerate(tower_grads):
+            if i == 0:
+                continue
+            for index, grad in enumerate(grads):
+                name = "{}-grad".format(grad[index][1].name)
+                tf.summary.histogram(name, grad[index])
 
         # calculate accuracy
         with tf.variable_scope(tf.get_variable_scope(), reuse=True), \
@@ -203,13 +212,14 @@ def learn(lr_=1e-4, dr_=0.7, gpu_cnt=1):
         for i in trange(epoch_steps, desc="Training....."):
             feed_dict_ = {}
             feed_dict_[lr] = learning_rate
-            for gpu_idx in range(gpu_cnt):
+            for i in range(gpu_cnt):
                 batch = feed[0].next_batch(batch_cnt)
-                feed_dict_[f_list[gpu_idx]] = np.array(batch[0])
-                feed_dict_[m_list[gpu_idx]] = np.array(batch[1])
-                feed_dict_[r_list[gpu_idx]] = np.array(batch[2])
+                feed_dict_[features[i]] = np.array(batch[0])
+                feed_dict_[movies[i]] = np.array(batch[1])
+                feed_dict_[results[i]] = np.array(batch[2])
 
-            _, w_summury = sess.run([train_op, summary], feed_dict=feed_dict_)
+            _, w_summury = sess.run(
+                [train_optimizer, summary], feed_dict=feed_dict_)
             writer.add_summary(w_summury, global_step_idx)
             global_step_idx += 1
 

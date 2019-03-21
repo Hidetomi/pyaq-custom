@@ -27,6 +27,7 @@ class DualNetwork(object):
         return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1],
                             padding='SAME', name="conv2d")
 
+    # ReLU
     def res_block(self, x, input_size, middle_size, output_size,
                   dr_block=1.0, scope_name="res"):
 
@@ -36,16 +37,12 @@ class DualNetwork(object):
                                    w_wdt, name_="weight")
             b0 = self.get_variable([middle_size], b_wdt, name_="bias")
             conv0 = tf.nn.relu(self.conv2d(x, w0) + b0)
-            # tf.summary.histogram('weight0', w0)
-            # tf.summary.scalar('bias0', b0)
 
         with tf.variable_scope(scope_name + "_1"):
             w1 = self.get_variable([3, 3, middle_size, output_size],
                                    w_wdt, name_="weight")
             b1 = self.get_variable([output_size], b_wdt, name_="bias")
             conv1 = tf.nn.dropout(self.conv2d(conv0, w1) + b1, dr_block)
-            # tf.summary.histogram('weight1', w1)
-            # tf.summary.histogram('bias', b1)
 
         if input_size == output_size:
             x_add = x
@@ -124,13 +121,17 @@ class DualNetwork(object):
     def create_sess(self, ckpt_path=""):
         with tf.get_default_graph().as_default():
 
-            sess_ = tf.Session(config=tf.ConfigProto(
-                allow_soft_placement=True, log_device_placement=False)
-            )
+            sess_ = tf.Session(
+                config=tf.ConfigProto(
+                    allow_soft_placement=True,
+                    log_device_placement=False))
+
             vars_train = tf.get_collection("vars_train")
+
             v_to_init = list(set(tf.global_variables()) - set(vars_train))
 
             saver = tf.train.Saver(vars_train, write_version=1)
+
             if ckpt_path != "":
                 saver.restore(sess_, ckpt_path)
                 sess_.run(tf.variables_initializer(v_to_init))

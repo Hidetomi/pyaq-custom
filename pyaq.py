@@ -60,4 +60,4 @@ if __name__ == "__main__":
         sys.stderr.write("result: %s\n" % result_str)
 
     else:
-        learn.learn(3e-4, 0.5, gpu_cnt=1)
+        learn.learn(3e-4, 0.5)

@@ -51,7 +51,7 @@ def sgf2feed(games, all_games_total_tempo):
         board_size = int(game_information.get('SZ')[0])
         handy_cap = 0 \
             if game_information.get('HA') is None \
-            else int(game_information.get('HA'))
+            else int(game_information.get('HA')[0])
 
         # 指定した碁盤のサイズ以外、置碁は対象外
         if board_size != BSIZE or handy_cap != 0:
